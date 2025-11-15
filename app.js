@@ -15,12 +15,10 @@ const app = express();
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for form data
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:5173", // ✅ must match frontend origin
-    credentials: true, // ✅ allow cookies
-  })
-);
+app.use(cors({
+  origin: ["https://twitter-x.vercel.app"],
+  credentials: true
+}));
 
 // 🛣️ Routes
 app.use("/api/v1/user", userRoute);
