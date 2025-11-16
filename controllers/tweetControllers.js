@@ -28,13 +28,24 @@ export const createTweet = async (req, res) => {
     let mediaType = null;
 
     // 🖼️ Upload media if present
+    // if (req.file) {
+    //   const uploaded = await cloudinary.uploader.upload(req.file.path, {
+    //     resource_type: "auto",
+    //   });
+    //   mediaUrl = uploaded.secure_url;
+    //   mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
+    // }
     if (req.file) {
-      const uploaded = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "auto",
-      });
-      mediaUrl = uploaded.secure_url;
-      mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
-    }
+  const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+  const uploaded = await cloudinary.uploader.upload(base64, {
+    resource_type: "auto",
+  });
+
+  mediaUrl = uploaded.secure_url;
+  mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
+}
+
 
     // 🧩 Create new tweet
     const newTweet = new Tweet({
