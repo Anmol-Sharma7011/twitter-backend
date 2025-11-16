@@ -75,14 +75,30 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    return res
-      .status(200)
-      .cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
-      .json({
-        message: `Welcome back ${user.name}`,
-        user,
-        success: true,
-      });
+    // return res
+    //   .status(200)
+    //   .cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 })
+    //   .json({
+    //     message: `Welcome back ${user.name}`,
+    //     user,
+    //     success: true,
+    //   });
+    const isProd = process.env.NODE_ENV === "production";
+
+return res
+  .status(200)
+  .cookie("token", token, { 
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    secure: isProd,               // ✔ Important for Render
+    sameSite: isProd ? "none" : "lax", // ✔ Required for cross-site cookies
+  })
+  .json({
+    message: `Welcome back ${user.name}`,
+    user,
+    success: true,
+  });
+
   } catch (error) {
     console.log("login error", error);
     return res.status(500).json({
