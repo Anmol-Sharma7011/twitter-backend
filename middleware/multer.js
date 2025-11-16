@@ -1,14 +1,21 @@
-import multer from "multer";
-import path from "path";
+// import multer from "multer";
+// import path from "path";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // make sure this folder exists in your backend root
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
-  },
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/"); // make sure this folder exists in your backend root
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueName = Date.now() + "-" + file.originalname;
+//     cb(null, uniqueName);
+//   },
+// });
+
+// export const upload = multer({ storage });
+
+import multer from "multer";
+
+export const upload = multer({
+  storage: multer.memoryStorage(),
 });
 
-export const upload = multer({ storage });
