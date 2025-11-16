@@ -356,9 +356,11 @@ export const getBookmarkedTweets = async (req, res) => {
 };
 
 // ✅ Update user profile (text + avatar + banner)
+// ✅ Update user profile (text + avatar + banner)
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user; // from isAuthenticated middleware
+
     if (!userId) {
       return res.status(401).json({
         message: "User not authenticated",
@@ -366,33 +368,45 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Get fields from body
+    // Fields from body
     const { name, username, email, bio } = req.body;
     let avatar = req.body.avatar;
     let banner = req.body.banner;
 
-    // ✅ If files are uploaded via Multer
+    // 🚀 File uploads using memoryStorage + Cloudinary
     if (req.files) {
-      // For avatar upload
+      // Avatar upload
       if (req.files.avatar && req.files.avatar[0]) {
-        const avatarUpload = await cloudinary.v2.uploader.upload(
-          req.files.avatar[0].path,
-          { folder: "profile_avatars" }
-        );
-        avatar = avatarUpload.secure_url;
+        const file = req.files.avatar[0];
+        const base64 = `data:${file.mimetype};base64,${file.buffer.toString(
+          "base64"
+        )}`;
+
+        const uploaded = await cloudinary.v2.uploader.upload(base64, {
+          folder: "profile_avatars",
+          resource_type: "auto",
+        });
+
+        avatar = uploaded.secure_url;
       }
 
-      // For banner upload
+      // Banner upload
       if (req.files.banner && req.files.banner[0]) {
-        const bannerUpload = await cloudinary.v2.uploader.upload(
-          req.files.banner[0].path,
-          { folder: "profile_banners" }
-        );
-        banner = bannerUpload.secure_url;
+        const file = req.files.banner[0];
+        const base64 = `data:${file.mimetype};base64,${file.buffer.toString(
+          "base64"
+        )}`;
+
+        const uploaded = await cloudinary.v2.uploader.upload(base64, {
+          folder: "profile_banners",
+          resource_type: "auto",
+        });
+
+        banner = uploaded.secure_url;
       }
     }
 
-    // ✅ Create an update object dynamically
+    // Build update payload
     const updatedFields = {};
     if (name) updatedFields.name = name;
     if (username) updatedFields.username = username;
@@ -401,7 +415,7 @@ export const updateProfile = async (req, res) => {
     if (avatar) updatedFields.avatar = avatar;
     if (banner) updatedFields.banner = banner;
 
-    // ✅ Update user in DB
+    // Update user in DB
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updatedFields },
@@ -420,6 +434,7 @@ export const updateProfile = async (req, res) => {
       success: true,
       user: updatedUser,
     });
+
   } catch (error) {
     console.error("Error updating profile:", error);
     return res.status(500).json({
